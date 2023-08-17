@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tap the Ball</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        #gameCanvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let ball = {
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            radius: 20,
+            dx: 2 * (Math.random() - 0.5),
+            dy: 2 * (Math.random() - 0.5)
+        };
+
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fillStyle = "blue";
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function moveBall() {
+            ball.x += ball.dx;
+            ball.y += ball.dy;
+
+            if(ball.x < 0 || ball.x > canvas.width) ball.dx = -ball.dx;
+            if(ball.y < 0 || ball.y > canvas.height) ball.dy = -ball.dy;
+        }
+
+        function update() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBall();
+            moveBall();
+            requestAnimationFrame(update);
+        }
+
+        canvas.addEventListener('click', function(e) {
+            const distance = Math.sqrt((e.clientX - ball.x) ** 2 + (e.clientY - ball.y) ** 2);
+            if(distance < ball.radius) {
+                ball.x = Math.random() * canvas.width;
+                ball.y = Math.random() * canvas.height;
+            }
+        });
+
+        update();
+    </script>
+</body>
+</html>

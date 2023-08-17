@@ -56,31 +56,32 @@
         let balls = [];
         let ballSize = 25;
         let ballCount = 1;
-        let roundCount = 1;
 
         function spawnBalls() {
-            const centerDist = ballSize + 5; // distance from center for each ball
             balls = [];
             for(let i = 0; i < ballCount; i++) {
+                const angle = i * 2 * Math.PI / ballCount;
                 balls.push({
-                    x: canvas.width / 2 + Math.cos(i * 2 * Math.PI / ballCount) * centerDist * i,
-                    y: canvas.height / 2 + Math.sin(i * 2 * Math.PI / ballCount) * centerDist * i,
+                    x: canvas.width / 2 + Math.cos(angle) * ballSize * 2,
+                    y: canvas.height / 2 + Math.sin(angle) * ballSize * 2,
                     radius: ballSize,
-                    dx: 0.5 * Math.cos(i * 2 * Math.PI / ballCount),
-                    dy: 0.5 * Math.sin(i * 2 * Math.PI / ballCount),
+                    dx: 0.5 * Math.cos(angle),
+                    dy: 0.5 * Math.sin(angle),
                     color: `rgb(${Math.random()*255},${Math.random()*255},${Math.random()*255})`
                 });
             }
-            if (roundCount % 2 === 0) {
-                ballSize--;
-            }
-            roundCount++;
+            ballSize--;
         }
 
         function drawBall(ball) {
+            // 3D effect using radial gradient
+            const gradient = ctx.createRadialGradient(ball.x - ball.radius/4, ball.y - ball.radius/4, 0, ball.x, ball.y, ball.radius);
+            gradient.addColorStop(0, 'white');
+            gradient.addColorStop(1, ball.color);
+            
             ctx.beginPath();
             ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-            ctx.fillStyle = ball.color;
+            ctx.fillStyle = gradient;
             ctx.fill();
             ctx.closePath();
         }
@@ -153,4 +154,4 @@
     </script>
 </body>
 
-</
+</html>

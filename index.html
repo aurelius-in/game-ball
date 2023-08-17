@@ -1,23 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tap the Ball</title>
     <style>
-        body {
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
             background-color: #f4f4f4;
         }
 
         #gameCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
             border: 1px solid black;
         }
     </style>
 </head>
+
 <body>
     <canvas id="gameCanvas"></canvas>
     <script>
@@ -46,8 +54,18 @@
             ball.x += ball.dx;
             ball.y += ball.dy;
 
-            if(ball.x < 0 || ball.x > canvas.width) ball.dx = -ball.dx;
-            if(ball.y < 0 || ball.y > canvas.height) ball.dy = -ball.dy;
+            if (ball.x < 0 || ball.x > canvas.width) ball.dx = -ball.dx;
+            if (ball.y < 0 || ball.y > canvas.height) ball.dy = -ball.dy;
+        }
+
+        function handleTap(e) {
+            const x = e.type === "click" ? e.clientX : e.touches[0].clientX;
+            const y = e.type === "click" ? e.clientY : e.touches[0].clientY;
+            const distance = Math.sqrt((x - ball.x) ** 2 + (y - ball.y) ** 2);
+            if (distance < ball.radius) {
+                ball.x = Math.random() * canvas.width;
+                ball.y = Math.random() * canvas.height;
+            }
         }
 
         function update() {
@@ -57,15 +75,11 @@
             requestAnimationFrame(update);
         }
 
-        canvas.addEventListener('click', function(e) {
-            const distance = Math.sqrt((e.clientX - ball.x) ** 2 + (e.clientY - ball.y) ** 2);
-            if(distance < ball.radius) {
-                ball.x = Math.random() * canvas.width;
-                ball.y = Math.random() * canvas.height;
-            }
-        });
+        canvas.addEventListener('click', handleTap);
+        canvas.addEventListener('touchstart', handleTap);
 
         update();
     </script>
 </body>
+
 </html>

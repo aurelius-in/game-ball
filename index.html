@@ -4,13 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
-    <title>Tap the Ball</title>
+    <title>Tap the Balls!</title>
     <style>
         * {
             padding: 0;
             margin: 0;
             box-sizing: border-box;
-            touch-action: none; /* Prevents native touch actions like pinch-to-zoom, double-tap-to-zoom, etc. */
+            touch-action: none;
         }
 
         body, html {
@@ -28,50 +28,84 @@
             left: 0;
             border: 1px solid black;
         }
+
+        #gameOver {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            background-color: rgba(255,255,255,0.8);
+            padding: 20px;
+            border-radius: 5px;
+        }
     </style>
 </head>
 
 <body>
     <canvas id="gameCanvas"></canvas>
+    <div id="gameOver">Game Over! Tap to play again.</div>
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
+        const gameOverElem = document.getElementById("gameOver");
 
-        let ball = {
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
-            radius: 20,
-            dx: 2 * (Math.random() - 0.5),
-            dy: 2 * (Math.random() - 0.5)
-        };
+        let ballSize = 25;
+        let balls = [{
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            radius: ballSize,
+            dx: 0.5 * (Math.random() + 0.5),
+            dy: 0.5 * (Math.random() + 0.5),
+            color: `rgb(${Math.random()*255},${Math.random()*255},${Math.random()*255})`
+        }];
 
-        function drawBall() {
+        function drawBall(ball) {
             ctx.beginPath();
             ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-            ctx.fillStyle = "blue";
+            ctx.fillStyle = ball.color;
             ctx.fill();
             ctx.closePath();
         }
 
-        function moveBall() {
+        function moveBall(ball) {
             ball.x += ball.dx;
             ball.y += ball.dy;
 
-            if (ball.x < 0 || ball.x > canvas.width) ball.dx = -ball.dx;
-            if (ball.y < 0 || ball.y > canvas.height) ball.dy = -ball.dy;
+            if (Math.abs(ball.x - canvas.width / 2) + ball.radius > canvas.width / 2 ||
+                Math.abs(ball.y - canvas.height / 2) + ball.radius > canvas.height / 2) {
+                endGame();
+            }
         }
 
         function handleTap(e) {
-            e.preventDefault(); 
+            e.preventDefault();
             const x = e.type === "click" ? e.clientX : e.touches[0].clientX;
             const y = e.type === "click" ? e.clientY : e.touches[0].clientY;
-            const distance = Math.sqrt((x - ball.x) ** 2 + (y - ball.y) ** 2);
-            if (distance < ball.radius) {
-                ball.x = Math.random() * canvas.width;
-                ball.y = Math.random() * canvas.height;
+
+            balls = balls.filter(ball => {
+                const distance = Math.sqrt((x - ball.x) ** 2 + (y - ball.y) ** 2);
+                return distance > ball.radius;
+            });
+
+            if (balls.length === 0) {
+                nextRound();
             }
+        }
+
+        function nextRound() {
+            ballSize -= 1;
+            balls.push(...Array.from({length: ballSize}, (_, index) => ({
+                x: canvas.width / 2,
+                y: canvas.height / 2,
+                radius: ballSize,
+                dx: 0.5 * (Math.random() + 0.5),
+                dy: 0.5 * (Math.random() + 0.5),
+                color: `rgb(${Math.random()*255},${Math.random()*255},${Math.random()*255})`
+            })));
         }
 
         function preventDefaultBehavior(e) {
@@ -80,10 +114,24 @@
 
         function update() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawBall();
-            moveBall();
+            balls.forEach(ball => {
+                drawBall(ball);
+                moveBall(ball);
+            });
             requestAnimationFrame(update);
         }
+
+        function endGame() {
+            gameOverElem.style.display = "block";
+            canvas.removeEventListener('click', handleTap);
+            canvas.removeEventListener('touchstart', handleTap);
+            canvas.removeEventListener('touchmove', preventDefaultBehavior);
+            canvas.removeEventListener('touchend', preventDefaultBehavior);
+        }
+
+        gameOverElem.addEventListener('click', () => {
+            location.reload();
+        });
 
         canvas.addEventListener('click', handleTap);
         canvas.addEventListener('touchstart', handleTap);

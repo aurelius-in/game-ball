@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
-    <title>Tap the Balls!</title>
+    <title>Balls to the Wall</title>
     <style>
         * {
             padding: 0;
@@ -53,15 +53,25 @@
         canvas.height = window.innerHeight;
         const gameOverElem = document.getElementById("gameOver");
 
-        let ballSize = 25;
         let balls = [{
             x: canvas.width / 2,
             y: canvas.height / 2,
-            radius: ballSize,
+            radius: 25,
             dx: 0.5 * (Math.random() + 0.5),
             dy: 0.5 * (Math.random() + 0.5),
             color: `rgb(${Math.random()*255},${Math.random()*255},${Math.random()*255})`
         }];
+
+        function createBall() {
+            return {
+                x: canvas.width / 2,
+                y: canvas.height / 2,
+                radius: 25,
+                dx: 0.5 * (Math.random() + 0.5) * (Math.random() < 0.5 ? -1 : 1),
+                dy: 0.5 * (Math.random() + 0.5) * (Math.random() < 0.5 ? -1 : 1),
+                color: `rgb(${Math.random()*255},${Math.random()*255},${Math.random()*255})`
+            }
+        }
 
         function drawBall(ball) {
             ctx.beginPath();
@@ -88,24 +98,16 @@
 
             balls = balls.filter(ball => {
                 const distance = Math.sqrt((x - ball.x) ** 2 + (y - ball.y) ** 2);
-                return distance > ball.radius;
+                const isHit = distance <= ball.radius;
+                
+                if (isHit) {
+                    setTimeout(() => {
+                        balls.push(createBall(), createBall());
+                    }, 1000);
+                }
+
+                return !isHit;
             });
-
-            if (balls.length === 0) {
-                nextRound();
-            }
-        }
-
-        function nextRound() {
-            ballSize -= 1;
-            balls.push(...Array.from({length: ballSize}, (_, index) => ({
-                x: canvas.width / 2,
-                y: canvas.height / 2,
-                radius: ballSize,
-                dx: 0.5 * (Math.random() + 0.5),
-                dy: 0.5 * (Math.random() + 0.5),
-                color: `rgb(${Math.random()*255},${Math.random()*255},${Math.random()*255})`
-            })));
         }
 
         function preventDefaultBehavior(e) {
@@ -114,6 +116,13 @@
 
         function update() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Drawing the game name
+            ctx.font = '48px sans-serif';
+            ctx.fillStyle = 'rgba(244, 244, 244, 0.7)';  // Faint text color
+            ctx.textAlign = 'center';
+            ctx.fillText('Balls to the Wall', canvas.width / 2, 60);
+            
             balls.forEach(ball => {
                 drawBall(ball);
                 moveBall(ball);

@@ -26,7 +26,6 @@
             position: absolute;
             top: 0;
             left: 0;
-            border: 1px solid black;
         }
 
         #gameOver {
@@ -35,9 +34,10 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 24px;
+            font-size: 16px;
+            font-family: 'Sans-serif';
             background-color: rgba(255,255,255,0.8);
-            padding: 20px;
+            padding: 10px;
             border-radius: 5px;
         }
     </style>
@@ -45,7 +45,7 @@
 
 <body>
     <canvas id="gameCanvas"></canvas>
-    <div id="gameOver">Game Over! Tap to play again.</div>
+    <div id="gameOver">Tap to play again.</div>
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
@@ -62,8 +62,8 @@
             for(let i = 0; i < ballCount; i++) {
                 const angle = i * 2 * Math.PI / ballCount;
                 balls.push({
-                    x: canvas.width / 2 + Math.cos(angle) * ballSize * 2,
-                    y: canvas.height / 2 + Math.sin(angle) * ballSize * 2,
+                    x: canvas.width / 2 + Math.cos(angle) * ballSize * 1.5,
+                    y: canvas.height / 2 + Math.sin(angle) * ballSize * 1.5,
                     radius: ballSize,
                     dx: 0.5 * Math.cos(angle),
                     dy: 0.5 * Math.sin(angle),
@@ -74,8 +74,8 @@
         }
 
         function drawBall(ball) {
-            // 3D effect using radial gradient
-            const gradient = ctx.createRadialGradient(ball.x - ball.radius/4, ball.y - ball.radius/4, 0, ball.x, ball.y, ball.radius);
+            // Enhanced 3D effect using radial gradient
+            const gradient = ctx.createRadialGradient(ball.x - ball.radius/3, ball.y - ball.radius/3, 0, ball.x, ball.y, ball.radius);
             gradient.addColorStop(0, 'white');
             gradient.addColorStop(1, ball.color);
             
@@ -120,10 +120,16 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             // Drawing the game name
-            ctx.font = '48px sans-serif';
+            ctx.font = '40px "Brush Script MT"';  // More decorative font
             ctx.fillStyle = 'rgba(244, 244, 244, 0.7)';  // Faint text color
             ctx.textAlign = 'center';
-            ctx.fillText('Balls to the Wall', canvas.width / 2, 60);
+            ctx.fillText('Balls to the Wall', canvas.width / 2, 50);
+
+            // Displaying the round number in the center
+            ctx.font = '100px sans-serif';
+            ctx.fillStyle = 'rgba(244, 244, 244, 0.5)';  // Faint text color
+            ctx.textAlign = 'center';
+            ctx.fillText(ballCount.toString(), canvas.width / 2, canvas.height / 2 + 30);
             
             balls.forEach(ball => {
                 drawBall(ball);

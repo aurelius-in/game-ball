@@ -53,24 +53,28 @@
         canvas.height = window.innerHeight;
         const gameOverElem = document.getElementById("gameOver");
 
-        let balls = [{
-            x: canvas.width / 2,
-            y: canvas.height / 2,
-            radius: 25,
-            dx: 0.5 * (Math.random() + 0.5),
-            dy: 0.5 * (Math.random() + 0.5),
-            color: `rgb(${Math.random()*255},${Math.random()*255},${Math.random()*255})`
-        }];
+        let balls = [];
+        let ballSize = 25;
+        let ballCount = 1;
+        let roundCount = 1;
 
-        function createBall() {
-            return {
-                x: canvas.width / 2,
-                y: canvas.height / 2,
-                radius: 25,
-                dx: 0.5 * (Math.random() + 0.5) * (Math.random() < 0.5 ? -1 : 1),
-                dy: 0.5 * (Math.random() + 0.5) * (Math.random() < 0.5 ? -1 : 1),
-                color: `rgb(${Math.random()*255},${Math.random()*255},${Math.random()*255})`
+        function spawnBalls() {
+            const centerDist = ballSize + 5; // distance from center for each ball
+            balls = [];
+            for(let i = 0; i < ballCount; i++) {
+                balls.push({
+                    x: canvas.width / 2 + Math.cos(i * 2 * Math.PI / ballCount) * centerDist * i,
+                    y: canvas.height / 2 + Math.sin(i * 2 * Math.PI / ballCount) * centerDist * i,
+                    radius: ballSize,
+                    dx: 0.5 * Math.cos(i * 2 * Math.PI / ballCount),
+                    dy: 0.5 * Math.sin(i * 2 * Math.PI / ballCount),
+                    color: `rgb(${Math.random()*255},${Math.random()*255},${Math.random()*255})`
+                });
             }
+            if (roundCount % 2 === 0) {
+                ballSize--;
+            }
+            roundCount++;
         }
 
         function drawBall(ball) {
@@ -98,16 +102,13 @@
 
             balls = balls.filter(ball => {
                 const distance = Math.sqrt((x - ball.x) ** 2 + (y - ball.y) ** 2);
-                const isHit = distance <= ball.radius;
-                
-                if (isHit) {
-                    setTimeout(() => {
-                        balls.push(createBall(), createBall());
-                    }, 1000);
-                }
-
-                return !isHit;
+                return distance > ball.radius;
             });
+
+            if (balls.length === 0) {
+                ballCount++;
+                setTimeout(spawnBalls, 1000);
+            }
         }
 
         function preventDefaultBehavior(e) {
@@ -147,8 +148,9 @@
         canvas.addEventListener('touchmove', preventDefaultBehavior);
         canvas.addEventListener('touchend', preventDefaultBehavior);
 
+        spawnBalls(); // Start the game with 1 ball
         update();
     </script>
 </body>
 
-</html>
+</
